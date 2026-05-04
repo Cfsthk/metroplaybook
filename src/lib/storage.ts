@@ -35,9 +35,13 @@ export async function loadPlaybookStateAsync(): Promise<PlaybookState> {
         .eq('id', SUPABASE_ROW_ID)
         .single()
       if (!error && data?.data) {
-        const normalized = normalizePlaybookState(data.data as PlaybookState)
-        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized))
-        return normalized
+        const remote = data.data as PlaybookState
+        // Only use Supabase data if it actually has content; otherwise keep local data
+        if (remote.playbooks && remote.playbooks.length > 0) {
+          const normalized = normalizePlaybookState(remote)
+          window.localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized))
+          return normalized
+        }
       }
     } catch (err) {
       console.warn('Supabase load failed, using local data:', err)
