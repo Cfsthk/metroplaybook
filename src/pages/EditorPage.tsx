@@ -23,7 +23,7 @@ export function EditorPage() {
   const [playheadFrame, setPlayheadFrame] = useState(PRE_FRAME)
   const [isPlaying, setIsPlaying] = useState(false)
   const [playbackSpeed, setPlaybackSpeed] = useState(1)
-  const [statusMessage, setStatusMessage] = useState('Select a frame, then drag a token or click a cell to place movement.')
+  const [_statusMessage, setStatusMessage] = useState('Select a frame, then drag a token or click a cell to place movement.')
   const [editingFrame, setEditingFrame] = useState<number | null>(null)
   const [editingDescription, setEditingDescription] = useState('')
   const [editingThought, setEditingThought] = useState<{ entityId: string; frame: number } | null>(null)
