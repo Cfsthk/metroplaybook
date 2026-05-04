@@ -46,8 +46,6 @@ export function FieldGrid({
     ? getEntityPositionAtFrame(play, selectedEntityId, playheadFrame)
     : null
   const hoverCells = hoverCell ? getPreviewCells(hoverCell, play.field.width, play.field.height) : []
-  const activeEntityId = draggingEntityId ?? selectedEntityId
-
   useEffect(() => {
     const clearDrag = () => {
       setDraggingEntityId(null)
