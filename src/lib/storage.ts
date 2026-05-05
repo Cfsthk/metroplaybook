@@ -15,7 +15,12 @@ export function loadPlaybookState() {
   }
 
   try {
-    return normalizePlaybookState(JSON.parse(rawState) as PlaybookState)
+    const parsed = JSON.parse(rawState) as PlaybookState
+    // Fall back to sample data if stored state has no playbooks (e.g. was corrupted by empty cloud sync)
+    if (!parsed.playbooks || parsed.playbooks.length === 0) {
+      return normalizePlaybookState(sampleState)
+    }
+    return normalizePlaybookState(parsed)
   } catch {
     return sampleState
   }
