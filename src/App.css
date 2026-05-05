@@ -880,6 +880,12 @@
   outline-offset: 1px;
 }
 
+.timeline-cell.segment-selected {
+  position: relative;
+  box-shadow: inset 0 0 0 2px #ffe600;
+  z-index: 1;
+}
+
 .timeline-caption {
   display: flex;
   flex-wrap: wrap;

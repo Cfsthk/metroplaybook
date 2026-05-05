@@ -7,8 +7,10 @@ interface TimelineEditorProps {
   playheadFrame: number
   selectedEntityId: string
   editingFrame: number | null
+  selectedSegmentId: string | null
   onSelectFrame: (frame: number) => void
   onSelectEntity: (entityId: string) => void
+  onSelectSegment: (id: string | null) => void
   onFrameHeaderClick: (frame: number) => void
 }
 
@@ -18,8 +20,10 @@ export function TimelineEditor({
   playheadFrame,
   selectedEntityId,
   editingFrame,
+  selectedSegmentId,
   onSelectFrame,
   onSelectEntity,
+  onSelectSegment,
   onFrameHeaderClick,
 }: TimelineEditorProps) {
   const frames = [PRE_FRAME, ...Array.from({ length: frameCount }, (_, frame) => frame)]
@@ -71,12 +75,14 @@ export function TimelineEditor({
                     return frame >= segment.startFrame && frame < segment.startFrame + segment.duration
                   })
                   const isSetupFrame = frame === PRE_FRAME
+                  const isSelectedSegment = !!activeSegment && activeSegment.id === selectedSegmentId
 
                   const classes = [
                     'timeline-cell',
                     isSetupFrame ? 'setup' : '',
                     activeSegment ? 'filled' : '',
                     playheadFrame === frame ? 'current' : '',
+                    isSelectedSegment ? 'segment-selected' : '',
                   ]
                     .filter(Boolean)
                     .join(' ')
@@ -94,10 +100,17 @@ export function TimelineEditor({
                         isSetupFrame
                           ? `Edit setup position for ${entity.label}`
                           : activeSegment
-                            ? describeSegment(activeSegment)
+                            ? `${describeSegment(activeSegment)} — click to select, Del to delete`
                             : `Go to frame ${frame}`
                       }
-                      onClick={() => onSelectFrame(frame)}
+                      onClick={() => {
+                        if (activeSegment) {
+                          onSelectSegment(activeSegment.id === selectedSegmentId ? null : activeSegment.id)
+                        } else {
+                          onSelectSegment(null)
+                        }
+                        onSelectFrame(frame)
+                      }}
                     >
                       {isSetupFrame ? 'S' : activeSegment ? frame - activeSegment.startFrame + 1 : ''}
                     </button>

@@ -7,6 +7,7 @@ interface FieldGridProps {
   selectedEntityId: string
   playheadFrame: number
   isPlaying: boolean
+  playbackSpeed: number
   editingThought: { entityId: string; frame: number } | null
   editingThoughtText: string
   onSelectEntity: (entityId: string) => void
@@ -22,6 +23,7 @@ export function FieldGrid({
   selectedEntityId,
   playheadFrame,
   isPlaying,
+  playbackSpeed,
   editingThought,
   editingThoughtText,
   onSelectEntity,
@@ -132,6 +134,8 @@ export function FieldGrid({
                     entity={entity}
                     position={pos}
                     selected={entity.id === selectedEntityId}
+                    isPlaying={isPlaying}
+                    playbackSpeed={playbackSpeed}
                     disabled={isPlaying}
                     onClick={() => {
                       onSelectEntity(entity.id)
@@ -198,12 +202,15 @@ interface EntityTokenProps {
   entity: Entity
   position: GridPosition
   selected: boolean
+  isPlaying: boolean
+  playbackSpeed: number
   disabled: boolean
   onClick: () => void
   onPointerDown: () => void
 }
 
-function EntityToken({ entity, position, selected, disabled, onClick, onPointerDown }: EntityTokenProps) {
+function EntityToken({ entity, position, selected, isPlaying, playbackSpeed, disabled, onClick, onPointerDown }: EntityTokenProps) {
+  const transitionMs = Math.floor(380 / playbackSpeed)
   return (
     <button
       type="button"
@@ -215,6 +222,7 @@ function EntityToken({ entity, position, selected, disabled, onClick, onPointerD
         left: `calc((${position.x} + 1) * (100% / var(--field-columns)))`,
         top: `calc((${position.y} + 1) * (100% / var(--field-rows)))`,
         background: entity.color,
+        transition: isPlaying ? `left ${transitionMs}ms linear, top ${transitionMs}ms linear` : undefined,
       }}
       aria-label={`Select ${entity.label}`}
     >
