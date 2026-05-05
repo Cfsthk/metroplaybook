@@ -725,7 +725,7 @@
 }
 
 .token {
-  --token-size: calc((100% / var(--field-columns)) * 1.2);
+  --token-size: calc((100% / var(--field-columns)) * 2.0);
   position: absolute;
   pointer-events: auto;
   display: inline-grid;
@@ -754,7 +754,7 @@
 }
 
 .token.disc {
-  --token-size: calc((100% / var(--field-columns)) * 0.7);
+  --token-size: calc((100% / var(--field-columns)) * 1.0);
   border-color: #fff7db;
   font-size: 0.72rem;
   box-shadow: 0 8px 14px rgba(12, 27, 21, 0.2);
