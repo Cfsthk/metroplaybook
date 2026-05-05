@@ -31,7 +31,7 @@ export function FieldGrid({
   onSaveThought,
   onCancelThought,
 }: FieldGridProps) {
-  const endZoneDepth = 4
+  const endZoneDepth = 6
   const [draggingEntityId, setDraggingEntityId] = useState<string | null>(null)
   const [hoverCell, setHoverCell] = useState<GridPosition | null>(null)
 
