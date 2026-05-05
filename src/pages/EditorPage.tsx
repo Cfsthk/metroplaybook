@@ -28,6 +28,7 @@ export function EditorPage() {
   const [editingDescription, setEditingDescription] = useState('')
   const [editingThought, setEditingThought] = useState<{ entityId: string; frame: number } | null>(null)
   const [editingThoughtText, setEditingThoughtText] = useState('')
+  const [selectedSegmentId, setSelectedSegmentId] = useState<string | null>(null)
   const [syncStatus, setSyncStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const frameCountRef = useRef(36)
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -72,6 +73,32 @@ export function EditorPage() {
 
     frameCountRef.current = getTimelineFrameCount(play)
   }, [play])
+
+  // Delete selected segment on Delete/Backspace key
+  useEffect(() => {
+    if (!selectedSegmentId) return
+    const handler = (e: KeyboardEvent) => {
+      if (e.key !== 'Delete' && e.key !== 'Backspace') return
+      const tag = (document.activeElement as HTMLElement)?.tagName
+      if (tag === 'TEXTAREA' || tag === 'INPUT') return
+      e.preventDefault()
+      setState((currentState) => ({
+        playbooks: currentState.playbooks.map((pb) => {
+          if (pb.id !== playbookId) return pb
+          return {
+            ...pb,
+            plays: pb.plays.map((pl) => {
+              if (pl.id !== playId) return pl
+              return { ...pl, segments: pl.segments.filter((s) => s.id !== selectedSegmentId) }
+            }),
+          }
+        }),
+      }))
+      setSelectedSegmentId(null)
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [selectedSegmentId, playbookId, playId])
 
   useEffect(() => {
     if (!isPlaying || !play) {
@@ -531,6 +558,7 @@ export function EditorPage() {
               selectedEntityId={selectedEntityId}
               playheadFrame={playheadFrame}
               isPlaying={isPlaying}
+              playbackSpeed={playbackSpeed}
               editingThought={editingThought}
               editingThoughtText={editingThoughtText}
               onSelectEntity={setSelectedEntityId}
@@ -547,6 +575,7 @@ export function EditorPage() {
               playheadFrame={playheadFrame}
               selectedEntityId={selectedEntityId}
               editingFrame={editingFrame}
+              selectedSegmentId={selectedSegmentId}
               onSelectFrame={(frame) => {
                 setIsPlaying(false)
                 setPlayheadFrame(frame)
@@ -555,6 +584,7 @@ export function EditorPage() {
                 setSelectedEntityId(entityId)
                 setIsPlaying(false)
               }}
+              onSelectSegment={setSelectedSegmentId}
               onFrameHeaderClick={handleFrameHeaderClick}
             />
           </div>
