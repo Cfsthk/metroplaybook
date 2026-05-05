@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useEffect, useRef, useState } from 'react'
 import { loadPlaybookState, loadPlaybookStateAsync, savePlaybookState, savePlaybookStateAsync } from '../lib/storage'
 import type { PlaybookState } from '../types/playbook'
@@ -6,7 +6,6 @@ import type { PlaybookState } from '../types/playbook'
 const FAVORITES_STORAGE_KEY = 'ultimate-frisbee-play-favorites'
 
 export function LibraryPage() {
-  const navigate = useNavigate()
   const [state, setState] = useState<PlaybookState>(() => loadPlaybookState())
   const [syncStatus, setSyncStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -143,16 +142,11 @@ export function LibraryPage() {
             className="button"
             onClick={() => {
               const timestamp = new Date().toISOString()
-              let newPlayId = ''
-              let playbookId = ''
               setState((currentState) => ({
                 playbooks: currentState.playbooks.map((playbook, index) => {
                   if (index !== 0) {
                     return playbook
                   }
-                  const newId = `play-${Date.now()}`
-                  newPlayId = newId
-                  playbookId = playbook.id
                   return {
                     ...playbook,
                     updatedAt: timestamp,
@@ -160,9 +154,9 @@ export function LibraryPage() {
                       ...playbook.plays,
                       {
                         ...playbook.plays[0],
-                        id: newId,
+                        id: `play-${Date.now()}`,
                         name: `New Play ${playbook.plays.length + 1}`,
-                        notes: 'Fresh board. Select a player, pick a frame, and start laying down route clips.',
+                        notes: '',
                         segments: [],
                         frameDescriptions: {},
                         entityMessages: {},
@@ -171,10 +165,6 @@ export function LibraryPage() {
                   }
                 }),
               }))
-              // Navigate after a tick so state is committed
-              setTimeout(() => {
-                if (newPlayId && playbookId) navigate(`/playbook/${playbookId}/play/${newPlayId}`)
-              }, 50)
             }}
           >
             Add play
