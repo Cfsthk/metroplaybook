@@ -178,6 +178,7 @@ export function FieldGrid({
               )
             })}
           </div>
+          <div className="field-grid-lines" aria-hidden="true" />
         </div>
       </div>
     </section>
