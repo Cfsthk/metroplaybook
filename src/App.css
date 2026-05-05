@@ -586,14 +586,7 @@
   padding: 1rem;
   border-radius: 0.95rem;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02)),
-    repeating-linear-gradient(
-      90deg,
-      rgba(255, 255, 255, 0.02),
-      rgba(255, 255, 255, 0.02) 14.28%,
-      rgba(255, 255, 255, 0.05) 14.28%,
-      rgba(255, 255, 255, 0.05) 28.56%
-    ),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.01)),
     linear-gradient(180deg, #2d6f57, #1c4f3d 55%, #173f31);
   box-shadow:
     inset 0 0 0 1px rgba(255, 255, 255, 0.1),
@@ -732,7 +725,7 @@
 }
 
 .token {
-  --token-size: calc((100% / var(--field-columns)) * 1.84);
+  --token-size: calc((100% / var(--field-columns)) * 1.2);
   position: absolute;
   pointer-events: auto;
   display: inline-grid;
@@ -761,7 +754,7 @@
 }
 
 .token.disc {
-  --token-size: calc((100% / var(--field-columns)) * 0.92);
+  --token-size: calc((100% / var(--field-columns)) * 0.7);
   border-color: #fff7db;
   font-size: 0.72rem;
   box-shadow: 0 8px 14px rgba(12, 27, 21, 0.2);

@@ -4,8 +4,8 @@ import type { PlaybookState } from '../types/playbook'
 
 const STORAGE_KEY = 'ultimate-frisbee-playbook-state'
 const SUPABASE_ROW_ID = 'main'
-const TARGET_FIELD_WIDTH = 14
-const TARGET_FIELD_HEIGHT = 24
+const TARGET_FIELD_WIDTH = 20
+const TARGET_FIELD_HEIGHT = 34
 
 export function loadPlaybookState() {
   const rawState = window.localStorage.getItem(STORAGE_KEY)
