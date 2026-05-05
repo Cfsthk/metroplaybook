@@ -32,10 +32,12 @@ export function EditorPage() {
   const frameCountRef = useRef(36)
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // Sync initial state from cloud on mount
+  const initialStateRef = useRef(state)
+
+  // Sync initial state from cloud on mount — only applies if user hasn't made local changes yet
   useEffect(() => {
     loadPlaybookStateAsync().then((cloudState) => {
-      setState(cloudState)
+      setState((prev) => prev === initialStateRef.current ? cloudState : prev)
     }).catch(() => {})
   }, [])
 

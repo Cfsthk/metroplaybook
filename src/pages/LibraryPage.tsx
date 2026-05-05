@@ -25,8 +25,12 @@ export function LibraryPage() {
     }
   })
 
+  const initialStateRef = useRef(state)
+
   useEffect(() => {
-    loadPlaybookStateAsync().then((cloudState) => setState(cloudState)).catch(() => {})
+    loadPlaybookStateAsync().then((cloudState) => {
+      setState((prev) => prev === initialStateRef.current ? cloudState : prev)
+    }).catch(() => {})
   }, [])
 
   useEffect(() => {
