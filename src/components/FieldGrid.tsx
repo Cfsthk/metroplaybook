@@ -1,13 +1,13 @@
 import { Fragment, useEffect, useState } from 'react'
-import { getEntityPositionAtFrame } from '../lib/timeline'
+import { getEntityPositionAtFrame, getEntityPositionSmooth } from '../lib/timeline'
 import type { Entity, GridPosition, Play } from '../types/playbook'
 
 interface FieldGridProps {
   play: Play
   selectedEntityId: string
   playheadFrame: number
+  renderFrame: number
   isPlaying: boolean
-  playbackSpeed: number
   editingThought: { entityId: string; frame: number } | null
   editingThoughtText: string
   onSelectEntity: (entityId: string) => void
@@ -22,8 +22,8 @@ export function FieldGrid({
   play,
   selectedEntityId,
   playheadFrame,
+  renderFrame,
   isPlaying,
-  playbackSpeed,
   editingThought,
   editingThoughtText,
   onSelectEntity,
@@ -124,7 +124,9 @@ export function FieldGrid({
 
           <div className="entity-layer">
             {play.entities.map((entity) => {
-              const pos = getEntityPositionAtFrame(play, entity.id, playheadFrame)
+              const pos = isPlaying
+                ? getEntityPositionSmooth(play, entity.id, renderFrame)
+                : getEntityPositionAtFrame(play, entity.id, playheadFrame)
               const message = (play.entityMessages ?? {})[`${entity.id}:${playheadFrame}`] ?? ''
               const isEditingThis = editingThought?.entityId === entity.id
 
@@ -134,8 +136,6 @@ export function FieldGrid({
                     entity={entity}
                     position={pos}
                     selected={entity.id === selectedEntityId}
-                    isPlaying={isPlaying}
-                    playbackSpeed={playbackSpeed}
                     disabled={isPlaying}
                     onClick={() => {
                       onSelectEntity(entity.id)
@@ -200,17 +200,14 @@ function getPreviewCells(position: GridPosition, fieldWidth: number, fieldHeight
 
 interface EntityTokenProps {
   entity: Entity
-  position: GridPosition
+  position: { x: number; y: number }
   selected: boolean
-  isPlaying: boolean
-  playbackSpeed: number
   disabled: boolean
   onClick: () => void
   onPointerDown: () => void
 }
 
-function EntityToken({ entity, position, selected, isPlaying, playbackSpeed, disabled, onClick, onPointerDown }: EntityTokenProps) {
-  const transitionMs = Math.floor(380 / playbackSpeed)
+function EntityToken({ entity, position, selected, disabled, onClick, onPointerDown }: EntityTokenProps) {
   return (
     <button
       type="button"
@@ -222,7 +219,6 @@ function EntityToken({ entity, position, selected, isPlaying, playbackSpeed, dis
         left: `calc((${position.x} + 1) * (100% / var(--field-columns)))`,
         top: `calc((${position.y} + 1) * (100% / var(--field-rows)))`,
         background: entity.color,
-        transition: isPlaying ? `left ${transitionMs}ms linear, top ${transitionMs}ms linear` : undefined,
       }}
       aria-label={`Select ${entity.label}`}
     >

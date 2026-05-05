@@ -29,8 +29,10 @@ export function EditorPage() {
   const [editingThought, setEditingThought] = useState<{ entityId: string; frame: number } | null>(null)
   const [editingThoughtText, setEditingThoughtText] = useState('')
   const [selectedSegmentId, setSelectedSegmentId] = useState<string | null>(null)
+  const [renderFrame, setRenderFrame] = useState<number>(PRE_FRAME)
   const [syncStatus, setSyncStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const frameCountRef = useRef(36)
+  const playStartRef = useRef<{ time: number; frame: number } | null>(null)
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const initialStateRef = useRef(state)
@@ -100,25 +102,48 @@ export function EditorPage() {
     return () => window.removeEventListener('keydown', handler)
   }, [selectedSegmentId, playbookId, playId])
 
+  // Sync renderFrame to playheadFrame when not playing
   useEffect(() => {
-    if (!isPlaying || !play) {
+    if (!isPlaying) setRenderFrame(playheadFrame)
+  }, [playheadFrame, isPlaying])
+
+  // Smooth rAF-based playback — updates renderFrame at 60fps for sub-pixel token movement
+  useEffect(() => {
+    if (!isPlaying) {
+      playStartRef.current = null
       return
     }
 
-    const frameCount = getTimelineFrameCount(play)
-    const timer = window.setInterval(() => {
-      setPlayheadFrame((currentFrame) => {
-        if (currentFrame >= frameCount - 1) {
-          setIsPlaying(false)
-          return frameCount - 1
-        }
+    const frameCount = frameCountRef.current
+    const mspf = 380 / playbackSpeed
+    const startFrame = playheadFrame === PRE_FRAME ? 0 : playheadFrame
+    playStartRef.current = { time: performance.now(), frame: startFrame }
+    let rafId: number
 
-        return currentFrame + 1
-      })
-    }, 380 / playbackSpeed)
+    const tick = (now: number) => {
+      const ps = playStartRef.current
+      if (!ps) return
 
-    return () => window.clearInterval(timer)
-  }, [isPlaying, play, playbackSpeed])
+      const rawFrame = ps.frame + (now - ps.time) / mspf
+      const clampedFrame = Math.min(rawFrame, frameCount - 1)
+
+      setRenderFrame(clampedFrame)
+      setPlayheadFrame(Math.min(Math.floor(clampedFrame), frameCount - 1))
+
+      if (clampedFrame >= frameCount - 1) {
+        setIsPlaying(false)
+        setPlayheadFrame(frameCount - 1)
+        setRenderFrame(frameCount - 1)
+        return
+      }
+
+      rafId = requestAnimationFrame(tick)
+    }
+
+    rafId = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(rafId)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isPlaying, playbackSpeed])
 
   useEffect(() => {
     if (isPlaying) {
@@ -557,8 +582,8 @@ export function EditorPage() {
               play={play}
               selectedEntityId={selectedEntityId}
               playheadFrame={playheadFrame}
+              renderFrame={renderFrame}
               isPlaying={isPlaying}
-              playbackSpeed={playbackSpeed}
               editingThought={editingThought}
               editingThoughtText={editingThoughtText}
               onSelectEntity={setSelectedEntityId}

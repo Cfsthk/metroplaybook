@@ -65,6 +65,43 @@ export function getEntityPositionAtFrame(
   return currentPosition
 }
 
+/** Like getEntityPositionAtFrame but returns floating-point coordinates for smooth sub-pixel rendering. */
+export function getEntityPositionSmooth(
+  play: Play,
+  entityId: string,
+  frame: number,
+): { x: number; y: number } {
+  const entity = getEntityById(play, entityId)
+
+  if (!entity) {
+    return { x: 0, y: 0 }
+  }
+
+  const segments = getEntitySegments(play, entityId)
+  let currentPosition: { x: number; y: number } = entity.basePosition
+
+  for (const segment of segments) {
+    if (frame < segment.startFrame) {
+      return currentPosition
+    }
+
+    const endFrame = getSegmentEndFrame(segment)
+
+    if (frame >= endFrame) {
+      currentPosition = segment.to
+      continue
+    }
+
+    const progress = Math.max(0, Math.min(1, (frame - segment.startFrame) / segment.duration))
+    return {
+      x: segment.from.x + (segment.to.x - segment.from.x) * progress,
+      y: segment.from.y + (segment.to.y - segment.from.y) * progress,
+    }
+  }
+
+  return currentPosition
+}
+
 export function getMovementDuration(entity: Entity, from: GridPosition, to: GridPosition) {
   const cells = manhattanDistance(from, to)
 
